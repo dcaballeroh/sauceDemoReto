@@ -10,7 +10,7 @@ resources:
   - repository: RepoAPI
     type: github
     name: dcaballeroh/booksOrdersReto
-    ref: main # Si tu rama de booksOrdersReto se llama 'master', cámbialo aquí
+    ref: main
     endpoint: 'github.com_dcaballeroh'
 
 steps:
@@ -26,27 +26,19 @@ steps:
     jdkSourceOption: 'PreInstalled'
   displayName: 'Configurar Java 17'
 
-# 1. Ejecutar Pruebas Web (Serenity BDD con Chrome Headless para Linux)
+# 1. Ejecutar Pruebas Web (Serenity BDD con Chrome Headless)
 - script: |
     cd $(Pipeline.Workspace)/s/web-tests
-    if [ -f "gradlew" ]; then
-      chmod +x gradlew
-      ./gradlew clean test aggregate -Dserenity.headless.mode=true -Dchrome.switches="--headless=new;--no-sandbox;--disable-dev-shm-usage;--disable-gpu;--window-size=1920,1080"
-    else
-      mvn clean verify -Dserenity.headless.mode=true -Dchrome.switches="--headless=new;--no-sandbox;--disable-dev-shm-usage;--disable-gpu;--window-size=1920,1080"
-    fi
+    chmod +x gradlew
+    ./gradlew clean test aggregate -Dserenity.headless.mode=true -Dchrome.switches="--headless=new;--no-sandbox;--disable-dev-shm-usage;--disable-gpu;--window-size=1920,1080"
   displayName: 'Ejecutar Pruebas Web (sauceDemoReto)'
   continueOnError: true
 
-# 2. Ejecutar Pruebas API (Karate - Detecta Gradle o Maven automáticamente)
+# 2. Ejecutar Pruebas API (Karate Framework)
 - script: |
     cd $(Pipeline.Workspace)/s/api-tests
-    if [ -f "gradlew" ]; then
-      chmod +x gradlew
-      ./gradlew test
-    else
-      mvn test
-    fi
+    chmod +x gradlew
+    ./gradlew test
   displayName: 'Ejecutar Pruebas API (booksOrdersReto)'
   continueOnError: true
 
@@ -57,29 +49,22 @@ steps:
     testResultsFormat: 'JUnit'
     testResultsFiles: |
       $(Pipeline.Workspace)/s/web-tests/**/TEST-*.xml
-      $(Pipeline.Workspace)/s/web-tests/**/SERENITY-JUNIT-*.xml
       $(Pipeline.Workspace)/s/api-tests/**/TEST-*.xml
     testRunTitle: 'Resultados Pruebas Web y API'
   displayName: 'Publicar Resultados en Azure'
 
-# 4. Guardar Reporte HTML de Serenity como evidencia descargable
+# 4. Guardar Reporte HTML de Serenity (en la ruta exacta target/)
 - task: PublishBuildArtifacts@1
   condition: always()
   inputs:
-    PathtoPublish: '$(Pipeline.Workspace)/s/web-tests/target/site/serenity'
+    PathtoPublish: '$(Pipeline.Workspace)/s/web-tests/target'
     ArtifactName: 'Reporte-Serenity-Web'
   displayName: 'Guardar Reporte Serenity'
 
-# 5. Guardar Reporte HTML de Karate (Funciona tanto si está en target o build)
-- script: |
-    mkdir -p $(Build.ArtifactStagingDirectory)/karate
-    cp -r $(Pipeline.Workspace)/s/api-tests/target/karate-reports/* $(Build.ArtifactStagingDirectory)/karate 2>/dev/null || true
-    cp -r $(Pipeline.Workspace)/s/api-tests/build/karate-reports/* $(Build.ArtifactStagingDirectory)/karate 2>/dev/null || true
-  displayName: 'Preparar Reporte Karate'
-
+# 5. Guardar Reporte HTML de Karate (busca automáticamente la carpeta build/karate-reports)
 - task: PublishBuildArtifacts@1
   condition: always()
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)/karate'
+    PathtoPublish: '$(Pipeline.Workspace)/s/api-tests/build/karate-reports'
     ArtifactName: 'Reporte-Karate-API'
   displayName: 'Guardar Reporte Karate'
