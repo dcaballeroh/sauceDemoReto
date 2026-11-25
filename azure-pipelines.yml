@@ -1,0 +1,85 @@
+trigger:
+- main
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+resources:
+  repositories:
+  - repository: RepoAPI
+    type: github
+    name: dcaballeroh/booksOrdersReto
+    ref: main # Si tu rama de booksOrdersReto se llama 'master', cámbialo aquí
+    endpoint: 'github.com_dcaballeroh'
+
+steps:
+- checkout: self
+  path: s/web-tests
+- checkout: RepoAPI
+  path: s/api-tests
+
+- task: JavaToolInstaller@0
+  inputs:
+    versionSpec: '17'
+    jdkArchitectureOption: 'x64'
+    jdkSourceOption: 'PreInstalled'
+  displayName: 'Configurar Java 17'
+
+# 1. Ejecutar Pruebas Web (Serenity BDD - Detecta Gradle o Maven automáticamente)
+- script: |
+    cd $(Pipeline.Workspace)/s/web-tests
+    if [ -f "gradlew" ]; then
+      chmod +x gradlew
+      ./gradlew clean test aggregate -Dserenity.headless.mode=true
+    else
+      mvn clean verify -Dserenity.headless.mode=true
+    fi
+  displayName: 'Ejecutar Pruebas Web (sauceDemoReto)'
+  continueOnError: true
+
+# 2. Ejecutar Pruebas API (Karate - Detecta Gradle o Maven automáticamente)
+- script: |
+    cd $(Pipeline.Workspace)/s/api-tests
+    if [ -f "gradlew" ]; then
+      chmod +x gradlew
+      ./gradlew test
+    else
+      mvn test
+    fi
+  displayName: 'Ejecutar Pruebas API (booksOrdersReto)'
+  continueOnError: true
+
+# 3. Publicar resultados en la pestaña "Tests" de Azure DevOps
+- task: PublishTestResults@2
+  condition: always()
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: |
+      $(Pipeline.Workspace)/s/web-tests/**/TEST-*.xml
+      $(Pipeline.Workspace)/s/web-tests/**/SERENITY-JUNIT-*.xml
+      $(Pipeline.Workspace)/s/api-tests/**/TEST-*.xml
+    testRunTitle: 'Resultados Pruebas Web y API'
+  displayName: 'Publicar Resultados en Azure'
+
+# 4. Guardar Reporte HTML de Serenity como evidencia descargable
+- task: PublishBuildArtifacts@1
+  condition: always()
+  inputs:
+    PathtoPublish: '$(Pipeline.Workspace)/s/web-tests/target/site/serenity'
+    ArtifactName: 'Reporte-Serenity-Web'
+  displayName: 'Guardar Reporte Serenity'
+
+# 5. Guardar Reporte HTML de Karate (Funciona tanto si está en target o build)
+- script: |
+    mkdir -p $(Build.ArtifactStagingDirectory)/karate
+    cp -r $(Pipeline.Workspace)/s/api-tests/target/karate-reports/* $(Build.ArtifactStagingDirectory)/karate 2>/dev/null || true
+    cp -r $(Pipeline.Workspace)/s/api-tests/build/karate-reports/* $(Build.ArtifactStagingDirectory)/karate 2>/dev/null || true
+  displayName: 'Preparar Reporte Karate'
+
+- task: PublishBuildArtifacts@1
+  condition: always()
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/karate'
+    ArtifactName: 'Reporte-Karate-API'
+  displayName: 'Guardar Reporte Karate'
