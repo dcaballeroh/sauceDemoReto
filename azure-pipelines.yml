@@ -26,14 +26,14 @@ steps:
     jdkSourceOption: 'PreInstalled'
   displayName: 'Configurar Java 17'
 
-# 1. Ejecutar Pruebas Web (Serenity BDD - Detecta Gradle o Maven automáticamente)
+# 1. Ejecutar Pruebas Web (Serenity BDD con Chrome Headless para Linux)
 - script: |
     cd $(Pipeline.Workspace)/s/web-tests
     if [ -f "gradlew" ]; then
       chmod +x gradlew
-      ./gradlew clean test aggregate -Dserenity.headless.mode=true
+      ./gradlew clean test aggregate -Dserenity.headless.mode=true -Dchrome.switches="--headless=new;--no-sandbox;--disable-dev-shm-usage;--disable-gpu;--window-size=1920,1080"
     else
-      mvn clean verify -Dserenity.headless.mode=true
+      mvn clean verify -Dserenity.headless.mode=true -Dchrome.switches="--headless=new;--no-sandbox;--disable-dev-shm-usage;--disable-gpu;--window-size=1920,1080"
     fi
   displayName: 'Ejecutar Pruebas Web (sauceDemoReto)'
   continueOnError: true
