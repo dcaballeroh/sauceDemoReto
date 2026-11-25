@@ -1,335 +1,86 @@
-# 🚀 Arquetipo Base de Automatización Web - Serenity BDD
+# Automatización E2E - SauceDemo (Screenplay & Serenity BDD)
 
-## 📋 Descripción
+Proyecto de automatización de pruebas End-to-End (E2E) sobre la plataforma **SauceDemo**, desarrollado bajo el patrón de diseño **Screenplay**, utilizando **Serenity BDD**, **Cucumber** y **Gradle**.
 
-Este proyecto es un **arquetipo base de automatización** diseñado para que analistas QA puedan automatizar pruebas web de manera eficiente y escalable. Utiliza **Serenity BDD** con **Cucumber** y el patrón **Screenplay** para crear pruebas mantenibles y legibles.
+## 📋 Escenarios Automatizados
 
-## 🎯 Objetivo
+El archivo `sauceDemon.feature` contempla un flujo común de autenticación (`Background`) y dos escenarios principales:
 
-Proporcionar una estructura base que permita a candidatos o analistas QA automatizar cualquier aplicación web siguiendo las mejores prácticas de la industria.
+1. **Successful product purchase end to end:** El usuario inicia sesión, agrega un producto al carrito, completa el formulario de checkout y valida el mensaje de confirmación de la orden (`Thank you for your order!`).
+2. **Remove product from cart and logout end to end:** El usuario inicia sesión, agrega un producto al carrito, lo elimina, cierra sesión y verifica el retorno a la pantalla de inicio de sesión.
 
-## 🛠️ Stack Tecnológico
+## 🛠️ Tecnologías y Herramientas
 
-- **Java 11+** - Lenguaje de programación
-- **Serenity BDD 4.0.12** - Framework de automatización y reporting
-- **Cucumber 7.14.0** - BDD framework para escribir pruebas en Gherkin
-- **Selenium WebDriver 4.17.0** - Automatización de navegadores
-- **Gradle** - Gestión de dependencias y construcción
-- **WebDriverManager** - Gestión automática de drivers
-- **Lombok** - Reducción de código boilerplate
-- **JavaFaker** - Generación de datos de prueba
+* **Java** (JDK 11 o superior)
+* **Gradle** - Gestor de dependencias y construcción
+* **Serenity BDD** - Framework de automatización y generación de reportes vivos
+* **Cucumber** - Definición de pruebas bajo enfoque BDD (Gherkin)
+* **Patrón Screenplay** - Arquitectura modular centrada en el usuario
 
-## 📁 Estructura del Proyecto
+## 📂 Estructura del Proyecto
 
-```
-ProyectoBaseSPCandidato/
-├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── com.co.choucair/
-│   │           ├── interactions/    # Interacciones personalizadas
-│   │           ├── model/           # Clases de modelo/datos
-│   │           ├── questions/       # Questions del patrón Screenplay
-│   │           ├── tasks/           # Tasks del patrón Screenplay
-│   │           ├── ui/              # Page Objects / Elementos UI
-│   │           └── utils/           # Utilidades generales
-│   └── test/
-│       ├── java/
-│       │   ├── runners/             # Test Runners de Cucumber
-│       │   └── stepdefinitions/     # Definición de pasos Gherkin
-│       └── resources/
-│           ├── features/            # Archivos .feature en Gherkin
-│           └── serenity.conf        # Configuración de Serenity
-├── build.gradle                     # Configuración de Gradle
-├── serenity.properties             # Propiedades de Serenity
-└── README.md                        # Este archivo
+La arquitectura sigue las buenas prácticas del patrón Screenplay bajo el paquete base `com.co.choucair`:
+
+```text
+ProyectoBaseSPCandidato
+├── src
+│   ├── main
+│   │   └── java/com/co/choucair
+│   │       ├── interactions      # Acciones de bajo nivel sobre la interfaz
+│   │       ├── models            # Modelos de datos (ej. credenciales, datos de envío)
+│   │       ├── questions         # Validaciones y aserciones del estado de la UI
+│   │       ├── tasks             # Tareas de negocio de alto nivel (Login, Compra, etc.)
+│   │       ├── userinterfaces    # Mapeo de elementos y localizadores de las páginas
+│   │       └── utils             # Utilidades y constantes generales
+│   └── test
+│       ├── java/com/co/choucair
+│       │   ├── runners           # Clases ejecutoras (sauceDemonRunner)
+│       │   └── stepdefinitions   # Definición de pasos y Hooks de Cucumber
+│       └── resources
+│           ├── features          # Archivos .feature con escenarios en Gherkin (sauceDemon.feature)
+│           └── serenity.conf     # Configuración de drivers, URLs y propiedades de Serenity
+└── build.gradle                  # Dependencias y configuración de tareas de Gradle
 ```
 
-## 🚦 Inicio Rápido
+## ⚙️ Prerrequisitos
 
-### Prerrequisitos
+Antes de ejecutar el proyecto, asegúrate de contar con:
 
-```bash
-# Verificar Java
-java -version  # Debe ser 11 o superior
+* **Java JDK** (11 o 17 recomendado) configurado en las variables de entorno (`JAVA_HOME`).
+* **Gradle** (o utilizar el wrapper `./gradlew` incluido en el proyecto).
+* Navegador web actualizado (**Google Chrome** o **Microsoft Edge**).
 
-# Verificar Gradle
-gradle -v      # O usar ./gradlew incluido
+## 🚀 Ejecución de las Pruebas
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone https://github.com/dcaballeroh/sauceDemoReto.git
+   cd ProyectoBaseSPCandidato
+   ```
+
+2. **Ejecutar todos los escenarios y generar el reporte:**
+    * En Windows:
+      ```bash
+      gradle clean test aggregate 
+      ```
+    * En Linux / macOS:
+      ```bash
+      ./gradle clean test aggregate 
+      ```
+
+3. **Ejecutar desde el Runner en IntelliJ IDEA:**
+   Dirígete a `src/test/java/com/co/choucair/runners/sauceDemonRunner.java` y ejecuta la clase directamente.
+
+## 📊 Reportes de Serenity BDD
+
+Una vez finalizada la ejecución de las pruebas, Serenity BDD genera un reporte detallado con evidencias paso a paso y capturas de pantalla.
+
+Puedes visualizarlo abriendo el siguiente archivo en tu navegador:
+```text
+target/site/serenity/index.html
 ```
+*(Nota: Si utilizas la configuración estándar de Gradle sin cambiar el directorio de salida, también puede ubicarse en `build/reports/tests/` o `target/site/serenity/index.html`).*
 
-### Instalación
+## ✍️ Autor
 
-```bash
-# Clonar el repositorio
-git clone [URL_DEL_REPOSITORIO]
-cd ProyectoBaseSPCandidato
-
-# Instalar dependencias
-gradle clean build
-
-# Ejecutar pruebas de ejemplo
-gradle test
-```
-
-### Ejecución de Pruebas
-
-```bash
-# Ejecutar todas las pruebas
-gradle clean test aggregate
-
-# Ejecutar pruebas con tags específicos
-gradle test -Dcucumber.filter.tags="@smoke"
-gradle test -Dcucumber.filter.tags="@regression"
-
-# Ejecutar en navegador específico
-gradle test -Dwebdriver.driver=firefox
-
-# Generar reporte
-gradle aggregate
-```
-
-## 📊 Criterios Mínimos de Automatización
-
-### ✅ Pruebas de Adherencia (Smoke Tests)
-*Verificación básica de que el sistema está operativo*
-
-| # | Criterio | Tag Sugerido | Prioridad |
-|---|----------|--------------|-----------|
-| 1 | Validar que la URL principal carga sin errores (HTTP 200) | `@smoke` | CRÍTICA |
-| 2 | Comprobar certificado SSL válido (o página carga correctamente) | `@smoke` | ALTA |
-| 3 | Usuario válido accede correctamente | `@smoke @auth` | CRÍTICA |
-| 4 | Desde el home se puede acceder a página secundaria crítica | `@smoke @navigation` | ALTA |
-| 5 | Enviar formulario con datos válidos | `@smoke @forms` | ALTA |
-| 6 | Verificar carga de CSS/JS principales y recurso multimedia | `@smoke @resources` | MEDIA |
-| 7 | Apertura en al menos 2 navegadores (Chrome + Firefox) | `@smoke @crossbrowser` | ALTA |
-
-### 🔧 Pruebas Funcionales
-*Validación completa de funcionalidades del sistema*
-
-| # | Criterio | Tag Sugerido | Área |
-|---|----------|--------------|------|
-| 1 | **Navegación global**: menú y enlaces principales funcionan | `@functional @navigation` | Navegación |
-| 2 | **Rutas críticas**: flujos happy path completos | `@functional @critical` | Core Business |
-| 3 | **Autenticación**: login válido/inválido/bloqueo | `@functional @auth` | Seguridad |
-| 4 | **Recuperación de contraseña**: flujo completo | `@functional @password` | Seguridad |
-| 5 | **Gestión de sesión**: expiración y redirección | `@functional @session` | Seguridad |
-| 6 | **Validación de formularios**: campos obligatorios, tipos, máscaras | `@functional @forms` | Entrada de Datos |
-| 7 | **Validación server vs client**: mensajes consistentes | `@functional @validation` | Entrada de Datos |
-| 8 | **Gestión de archivos**: subida/descarga con validaciones | `@functional @files` | Archivos |
-| 9 | **Búsqueda/filtrado/paginación**: incluye "sin resultados" | `@functional @search` | Consultas |
-| 10 | **Ordenamiento de tablas**: asc/desc estable | `@functional @tables` | Visualización |
-| 11 | **Estados vacíos y errores**: 404/500 personalizados | `@functional @errors` | UX |
-| 12 | **Internacionalización**: formato fecha, moneda, separadores | `@functional @i18n` | Localización |
-
-### 🌐 Pruebas de Compatibilidad
-*Asegurar funcionamiento en diferentes entornos*
-
-| # | Criterio | Tag Sugerido | Cobertura |
-|---|----------|--------------|-----------|
-| 1 | **Navegadores objetivo**: Chrome, Firefox, Safari, Edge | `@compatibility @browsers` | Multi-browser |
-| 2 | **Responsive design**: xs, sm, md, lg breakpoints | `@compatibility @responsive` | Multi-device |
-| 3 | **Inputs HTML5**: comportamiento consistente | `@compatibility @html5` | Estándares |
-| 4 | **Cookies/LocalStorage**: habilitado y deshabilitado | `@compatibility @storage` | Configuración |
-| 5 | **Fuentes/íconos**: carga correcta y fallbacks | `@compatibility @assets` | Recursos |
-| 6 | **Compatibilidad móvil**: gestos básicos | `@compatibility @mobile` | Touch devices |
-| 7 | **Soporte RTL**: verificación si aplica | `@compatibility @rtl` | Idiomas |
-| 8 | **Impresión CSS**: páginas críticas | `@compatibility @print` | Salida |
-
-## 🎭 Patrón Screenplay
-
-### Estructura de una Prueba
-
-```gherkin
-Feature: Login test
-  
-  Scenario Outline: testing the successful login
-    Given the user is on the serenity demo page
-    When attempts to log in
-      | user   | pass   |
-      | <user> | <pass> |
-    Then validate the text on screen <message>
-    
-    Examples:
-      | user  | pass     | message   |
-      | admin | serenity | Dashboard |
-```
-
-### Implementación con Screenplay
-
-```java
-// Task
-public class Login implements Task {
-    public static Login withCredentials(String user, String password) {
-        return instrumented(Login.class, user, password);
-    }
-    
-    @Override
-    public <T extends Actor> void performAs(T actor) {
-        actor.attemptsTo(
-            Enter.theValue(user).into(USERNAME_FIELD),
-            Enter.theValue(password).into(PASSWORD_FIELD),
-            Click.on(LOGIN_BUTTON)
-        );
-    }
-}
-
-// Question
-public class DashboardMessage implements Question<String> {
-    public static DashboardMessage displayed() {
-        return new DashboardMessage();
-    }
-    
-    @Override
-    public String answeredBy(Actor actor) {
-        return DASHBOARD_MESSAGE.resolveFor(actor).getText();
-    }
-}
-```
-
-## 🌟 Características Avanzadas
-
-### Selenium Grid Support
-
-El proyecto está preparado para ejecutarse en **Selenium Grid** para pruebas paralelas y distribuidas:
-
-```properties
-# serenity.conf
-webdriver {
-  remote {
-    url = "http://selenium-hub:4444/wd/hub"
-    driver = chrome
-  }
-  capabilities {
-    browserName = "chrome"
-    version = "latest"
-    platform = "LINUX"
-    maxInstances = 5
-  }
-}
-```
-
-**Ventajas de usar Selenium Grid:**
-- ✅ **Ejecución paralela** - Reduce tiempo de ejecución hasta 70%
-- ✅ **Multi-browser testing** - Pruebas simultáneas en diferentes navegadores
-- ✅ **Escalabilidad horizontal** - Añadir nodos según demanda
-- ✅ **CI/CD optimizado** - Integración perfecta con pipelines
-- ✅ **Gestión centralizada** - Un único punto de control
-- ✅ **Ahorro de recursos** - Distribución de carga entre máquinas
-
-### Ejecución con Docker Compose
-
-```yaml
-# docker-compose.yml
-version: '3'
-services:
-  selenium-hub:
-    image: selenium/hub:latest
-    ports:
-      - "4444:4444"
-  
-  chrome:
-    image: selenium/node-chrome:latest
-    depends_on:
-      - selenium-hub
-    environment:
-      - HUB_HOST=selenium-hub
-    deploy:
-      replicas: 3
-  
-  firefox:
-    image: selenium/node-firefox:latest
-    depends_on:
-      - selenium-hub
-    environment:
-      - HUB_HOST=selenium-hub
-    deploy:
-      replicas: 2
-```
-
-## 📈 Reportes
-
-### Serenity Reports
-Los reportes se generan automáticamente en `target/site/serenity/`:
-- **index.html** - Reporte principal con resumen ejecutivo
-- **capabilities.html** - Cobertura por funcionalidad
-- **requirements.html** - Trazabilidad de requerimientos
-
-### Visualización de Reportes
-```bash
-# Generar y abrir reporte
-gradle aggregate
-open target/site/serenity/index.html
-```
-
-## 🔄 Integración CI/CD
-
-### Jenkins Pipeline Example
-```groovy
-pipeline {
-    agent any
-    stages {
-        stage('Test') {
-            parallel {
-                stage('Chrome Tests') {
-                    steps {
-                        sh 'gradle test -Dwebdriver.driver=chrome'
-                    }
-                }
-                stage('Firefox Tests') {
-                    steps {
-                        sh 'gradle test -Dwebdriver.driver=firefox'
-                    }
-                }
-            }
-        }
-        stage('Report') {
-            steps {
-                sh 'gradle aggregate'
-                publishHTML(target: [
-                    reportDir: 'target/site/serenity',
-                    reportFiles: 'index.html',
-                    reportName: 'Serenity Report'
-                ])
-            }
-        }
-    }
-}
-```
-
-## 📝 Mejores Prácticas
-
-1. **Page Object Pattern**: Mantener selectores centralizados
-2. **Data-Driven Testing**: Usar Examples en Cucumber
-3. **Tags Strategy**: Organizar pruebas por categorías
-4. **Explicit Waits**: Evitar Thread.sleep()
-5. **Clean Code**: Nombres descriptivos y responsabilidad única
-6. **Version Control**: Commit frecuentes con mensajes claros
-7. **Test Independence**: Cada test debe ser autónomo
-8. **Reporting**: Documentar fallos con screenshots
-9. **Pipeline CI/CD**: Recuerda utilizar Azure DevOps, Jenkins.
-10. **Escaneo SonarQube**: Siempre verifica que tu codigo siga las mejores practicas.
-11. **Continuos Testing**: Entre mas se usen tus pruebas, mas rapido es el ROI (Retorno de inversión).
-12. **Metricas**: Antes de codificar, piensa siempre en las metricas de exito o los KPI del proyecto.
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crea tu feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push al branch (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📚 Recursos Adicionales
-
-- [Serenity BDD Documentation](https://serenity-bdd.github.io/docs/guide/user_guide_intro)
-- [Cucumber Documentation](https://cucumber.io/docs)
-- [Screenplay Pattern Guide](https://serenity-bdd.github.io/docs/screenplay/screenplay)
-- [Selenium Grid Documentation](https://www.selenium.dev/documentation/grid/)
-
-## 📧 Contacto
-
-Para preguntas o sugerencias sobre este arquetipo, contactar al equipo de QA.
-
----
-
-⚡ **Happy Testing!** ⚡
+* **David Caballero**
